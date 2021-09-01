@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Vehicles.API.Data;
 using Vehicles.API.Data.Entities;
@@ -15,7 +13,7 @@ namespace Vehicles.API.Controllers
 
         public ProceduresController(DataContext context)
         {
-            this._context = context;
+            _context = context;
         }
 
         public async Task<IActionResult> Index()
