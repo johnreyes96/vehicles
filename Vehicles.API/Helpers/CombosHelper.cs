@@ -29,7 +29,7 @@ namespace Vehicles.API.Helpers
             return list;
         }
 
-        public IEnumerable<SelectListItem> GetCombosDocumentType()
+        public IEnumerable<SelectListItem> GetCombosDocumentTypes()
         {
             List<SelectListItem> list = _context.Procedures.Select(x => new SelectListItem
             {
@@ -61,7 +61,7 @@ namespace Vehicles.API.Helpers
             return list;
         }
 
-        public IEnumerable<SelectListItem> GetCombosVehicleType()
+        public IEnumerable<SelectListItem> GetCombosVehicleTypes()
         {
             List<SelectListItem> list = _context.VehicleTypes.Select(x => new SelectListItem
             {
