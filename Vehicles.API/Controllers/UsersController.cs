@@ -238,5 +238,116 @@ namespace Vehicles.API.Controllers
             vehicleViewModel.VehicleTypes = _combosHelper.GetComboVehicleTypes();
             return View(vehicleViewModel);
         }
+
+        public async Task<IActionResult> EditVehicle(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            Vehicle vehicle = await _context.Vehicles
+                .Include(x => x.User)
+                .Include(x => x.Brand)
+                .Include(x => x.VehicleType)
+                .Include(x => x.VehiclePhotos)
+                .FirstOrDefaultAsync(x => x.Id == id);
+            if (vehicle == null)
+            {
+                return NotFound();
+            }
+
+            VehicleViewModel model = _converterHelper.ToVehicleViewModel(vehicle);
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditVehicle(int id, VehicleViewModel vehicleViewModel)
+        {
+            if (id != vehicleViewModel.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    Vehicle vehicle = await _converterHelper.ToVehicleAsync(vehicleViewModel, false);
+                    _context.Vehicles.Update(vehicle);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Details), new { id = vehicleViewModel.UserId });
+                }
+                catch (DbUpdateException dbUpdateException)
+                {
+                    if (dbUpdateException.InnerException.Message.Contains("duplicate"))
+                    {
+                        ModelState.AddModelError(string.Empty, "Ya existe un vehículo con esta placa.");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, dbUpdateException.InnerException.Message);
+                    }
+                }
+                catch (Exception exception)
+                {
+                    ModelState.AddModelError(string.Empty, exception.Message);
+                }
+            }
+
+            vehicleViewModel.Brands = _combosHelper.GetComboBrands();
+            vehicleViewModel.VehicleTypes = _combosHelper.GetComboVehicleTypes();
+            return View(vehicleViewModel);
+        }
+
+        public async Task<IActionResult> DeleteVehicle(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            Vehicle vehicle = await _context.Vehicles
+                .Include(x => x.User)
+                .Include(x => x.VehiclePhotos)
+                .Include(x => x.Histories)
+                .ThenInclude(x => x.Details)
+                .FirstOrDefaultAsync(x => x.Id == id);
+            if (vehicle == null)
+            {
+                return NotFound();
+            }
+
+            _context.Vehicles.Remove(vehicle);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Details), new { id = vehicle.User.Id });
+        }
+
+        public async Task<IActionResult> DeleteImageVehicle(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            VehiclePhoto vehiclePhoto = await _context.VehiclePhotos
+                .Include(x => x.Vehicle)
+                .FirstOrDefaultAsync(x => x.Id == id);
+            if (vehiclePhoto == null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                await _blobHelper.DeleteBlobAsync(vehiclePhoto.ImageId, "vehiclephotos");
+            }
+            catch { }
+
+            _context.VehiclePhotos.Remove(vehiclePhoto);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(EditVehicle), new { id = vehiclePhoto.Vehicle.Id });
+        }
     }
 }
