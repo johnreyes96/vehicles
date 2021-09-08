@@ -13,7 +13,7 @@ namespace Vehicles.API.Helpers
         {
             _context = context;
         }
-        public IEnumerable<SelectListItem> GetCombosBrands()
+        public IEnumerable<SelectListItem> GetComboBrands()
         {
             List<SelectListItem> list = _context.Brands.Select(x => new SelectListItem
             {
@@ -29,23 +29,7 @@ namespace Vehicles.API.Helpers
             return list;
         }
 
-        public IEnumerable<SelectListItem> GetCombosDocumentTypes()
-        {
-            List<SelectListItem> list = _context.Procedures.Select(x => new SelectListItem
-            {
-                Text = x.Description,
-                Value = $"{x.Id}"
-            }).OrderBy(x => x.Text).ToList();
-
-            list.Insert(0, new SelectListItem
-            {
-                Text = "[Seleccione una procedimiento...]",
-                Value = "0"
-            });
-            return list;
-        }
-
-        public IEnumerable<SelectListItem> GetCombosProcedures()
+        public IEnumerable<SelectListItem> GetComboDocumentTypes()
         {
             List<SelectListItem> list = _context.DocumentTypes.Select(x => new SelectListItem
             {
@@ -61,7 +45,23 @@ namespace Vehicles.API.Helpers
             return list;
         }
 
-        public IEnumerable<SelectListItem> GetCombosVehicleTypes()
+        public IEnumerable<SelectListItem> GetComboProcedures()
+        {
+            List<SelectListItem> list = _context.Procedures.Select(x => new SelectListItem
+            {
+                Text = x.Description,
+                Value = $"{x.Id}"
+            }).OrderBy(x => x.Text).ToList();
+
+            list.Insert(0, new SelectListItem
+            {
+                Text = "[Seleccione un procedimiento...]",
+                Value = "0"
+            });
+            return list;
+        }
+
+        public IEnumerable<SelectListItem> GetComboVehicleTypes()
         {
             List<SelectListItem> list = _context.VehicleTypes.Select(x => new SelectListItem
             {

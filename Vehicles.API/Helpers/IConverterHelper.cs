@@ -5,7 +5,7 @@ using Vehicles.API.Models;
 
 namespace Vehicles.API.Helpers
 {
-    interface IConverterHelper
+    public interface IConverterHelper
     {
         Task<User> ToUserAsync(UserViewModel model, Guid imageId, bool isNew);
 

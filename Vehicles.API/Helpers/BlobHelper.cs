@@ -14,7 +14,7 @@ namespace Vehicles.API.Helpers
 
         public BlobHelper(IConfiguration configuration)
         {
-            string keys = configuration["Blob.ConnectionString"];
+            string keys = configuration["Blob:ConnectionString"];
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(keys);
             _blobClient = storageAccount.CreateCloudBlobClient();
         }
