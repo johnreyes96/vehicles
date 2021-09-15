@@ -425,5 +425,63 @@ namespace Vehicles.API.Controllers
 
             return View(vehicle);
         }
+
+        public async Task<IActionResult> AddHistory(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            Vehicle vehicle = await _context.Vehicles.FindAsync(id);
+            if (vehicle == null)
+            {
+                return NotFound();
+            }
+
+            HistoryViewModel model = new HistoryViewModel
+            {
+                VehicleId = vehicle.Id
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddHistory(HistoryViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                Vehicle vehicle = await _context.Vehicles
+                    .Include(x => x.Histories)
+                    .FirstOrDefaultAsync(x => x.Id == model.VehicleId);
+                if (vehicle == null)
+                {
+                    return NotFound();
+                }
+
+                User user = await _userHelper.GetUserAsync(User.Identity.Name);
+                History history = new History
+                {
+                    Date = DateTime.UtcNow,
+                    Mileage = model.Mileage,
+                    Remarks = model.Remarks,
+                    User = user
+                };
+
+                if (vehicle.Histories == null)
+                {
+                    vehicle.Histories = new List<History>();
+                }
+
+                vehicle.Histories.Add(history);
+                _context.Vehicles.Update(vehicle);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(DetailsVehicle), new { id = vehicle.Id });
+            }
+
+            return View(model);
+        }
     }
 }
