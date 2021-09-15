@@ -349,5 +349,81 @@ namespace Vehicles.API.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(EditVehicle), new { id = vehiclePhoto.Vehicle.Id });
         }
+
+        public async Task<IActionResult> AddVehicleImage(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            Vehicle vehicle = await _context.Vehicles
+                .FirstOrDefaultAsync(x => x.Id == id);
+            if (vehicle == null)
+            {
+                return NotFound();
+            }
+
+            VehiclePhotoViewModel model = new()
+            {
+                VehicleId = vehicle.Id
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddVehicleImage(VehiclePhotoViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                Guid imageId = await _blobHelper.UploadBlobAsync(model.ImageFile, "vehiclephotos");
+                Vehicle vehicle = await _context.Vehicles
+                    .Include(x => x.VehiclePhotos)
+                    .FirstOrDefaultAsync(x => x.Id == model.VehicleId);
+                if (vehicle.VehiclePhotos == null)
+                {
+                    vehicle.VehiclePhotos = new List<VehiclePhoto>();
+                }
+
+                vehicle.VehiclePhotos.Add(new VehiclePhoto
+                {
+                    ImageId = imageId
+                });
+
+                _context.Vehicles.Update(vehicle);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(EditVehicle), new { id = vehicle.Id });
+            }
+
+            return View(model);
+        }
+
+        public async Task<IActionResult> DetailsVehicle(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            Vehicle vehicle = await _context.Vehicles
+                .Include(x => x.User)
+                .Include(x => x.VehicleType)
+                .Include(x => x.Brand)
+                .Include(x => x.VehiclePhotos)
+                .Include(x => x.Histories)
+                .ThenInclude(x => x.Details)
+                .ThenInclude(x => x.Procedure)
+                .Include(x => x.Histories)
+                .ThenInclude(x => x.User)
+                .FirstOrDefaultAsync(x => x.Id == id);
+            if (vehicle == null)
+            {
+                return NotFound();
+            }
+
+            return View(vehicle);
+        }
     }
 }
