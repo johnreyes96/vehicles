@@ -99,11 +99,6 @@ namespace Vehicles.API.Helpers
         {
             return await _context.Users
                 .Include(x => x.DocumentType)
-                .Include(x => x.Vehicles)
-                .ThenInclude(x => x.VehiclePhotos)
-                .Include(x => x.Vehicles)
-                .ThenInclude(x => x.Histories)
-                .ThenInclude(x => x.Details)
                 .FirstOrDefaultAsync(x => x.Email == email);
         }
 
@@ -111,11 +106,6 @@ namespace Vehicles.API.Helpers
         {
             return await _context.Users
                 .Include(x => x.DocumentType)
-                .Include(x => x.Vehicles)
-                .ThenInclude(x => x.VehiclePhotos)
-                .Include(x => x.Vehicles)
-                .ThenInclude(x => x.Histories)
-                .ThenInclude(x => x.Details)
                 .FirstOrDefaultAsync(x => x.Id == id.ToString());
         }
 
