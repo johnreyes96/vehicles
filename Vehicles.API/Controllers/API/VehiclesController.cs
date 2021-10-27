@@ -4,13 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Vehicles.API.Data;
 using Vehicles.API.Data.Entities;
 using Vehicles.API.Helpers;
 using Vehicles.API.Models.Request;
-using Vehicles.Common.Enums;
 
 namespace Vehicles.API.Controllers.API
 {
@@ -41,7 +39,7 @@ namespace Vehicles.API.Controllers.API
         [HttpGet("{id}")]
         public async Task<ActionResult<Vehicle>> GetVehicle(int id)
         {
-            var vehicle = await _context.Vehicles.FindAsync(id);
+            Vehicle vehicle = await _context.Vehicles.FindAsync(id);
 
             if (vehicle == null)
             {
@@ -51,35 +49,72 @@ namespace Vehicles.API.Controllers.API
             return vehicle;
         }
 
-        // PUT: api/Vehicles/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutVehicle(int id, Vehicle vehicle)
+        public async Task<IActionResult> PutVehicle(int id, VehicleRequest request)
         {
-            if (id != vehicle.Id)
+            if (id != request.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(vehicle).State = EntityState.Modified;
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            VehicleType vehicleType = await _context.VehicleTypes.FindAsync(request.VehicleTypeId);
+            if (vehicleType == null)
+            {
+                return BadRequest("El tipo de vehículo no existe.");
+            }
+
+            Brand brand = await _context.Brands.FindAsync(request.BrandId);
+            if (brand == null)
+            {
+                return BadRequest("La marca no existe.");
+            }
+
+            User user = await _userHelper.GetUserAsync(Guid.Parse(request.UserId));
+            if (user == null)
+            {
+                return BadRequest("El usuario no existe.");
+            }
+
+            Vehicle vehicle = await _context.Vehicles.FindAsync(request.Id);
+            if (vehicle != null)
+            {
+                return BadRequest("El vehículo no existe.");
+            }
+
+            vehicle.Brand = brand;
+            vehicle.Color = request.Color;
+            vehicle.Line = request.Line;
+            vehicle.Model = request.Model;
+            vehicle.Plaque = request.Plaque;
+            vehicle.Remarks = request.Remarks;
+            vehicle.VehicleType = vehicleType;
 
             try
             {
+                _context.Vehicles.Update(vehicle);
                 await _context.SaveChangesAsync();
+                return NoContent();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateException dbUpdateException)
             {
-                if (!VehicleExists(id))
+                if (dbUpdateException.InnerException.Message.Contains("duplicate"))
                 {
-                    return NotFound();
+                    return BadRequest("Ya existe esta marca.");
                 }
                 else
                 {
-                    throw;
+                    return BadRequest(dbUpdateException.InnerException.Message);
                 }
             }
-
-            return NoContent();
+            catch (Exception exception)
+            {
+                return BadRequest(exception.Message);
+            }
         }
 
         [HttpPost]
@@ -141,15 +176,17 @@ namespace Vehicles.API.Controllers.API
 
             _context.Vehicles.Add(vehicle);
             await _context.SaveChangesAsync();
-
             return Ok(vehicle);
         }
 
-        // DELETE: api/Vehicles/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteVehicle(int id)
         {
-            var vehicle = await _context.Vehicles.FindAsync(id);
+            Vehicle vehicle = await _context.Vehicles
+                .Include(x => x.VehiclePhotos)
+                .Include(x => x.Histories)
+                .ThenInclude(x => x.Details)
+                .FirstOrDefaultAsync(x => x.Id == id);
             if (vehicle == null)
             {
                 return NotFound();
@@ -157,13 +194,7 @@ namespace Vehicles.API.Controllers.API
 
             _context.Vehicles.Remove(vehicle);
             await _context.SaveChangesAsync();
-
             return NoContent();
-        }
-
-        private bool VehicleExists(int id)
-        {
-            return _context.Vehicles.Any(e => e.Id == id);
         }
     }
 }
