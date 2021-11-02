@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Vehicles.API.Data;
 using Vehicles.API.Data.Entities;
@@ -15,12 +13,12 @@ namespace Vehicles.API.Controllers.API
     [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
-    public class VehiclePhotoController : ControllerBase
+    public class VehiclePhotoesController : ControllerBase
     {
         private readonly DataContext _context;
         private readonly IBlobHelper _blobHelper;
 
-        public VehiclePhotoController(DataContext context, IBlobHelper blobHelper)
+        public VehiclePhotoesController(DataContext context, IBlobHelper blobHelper)
         {
             _context = context;
             _blobHelper = blobHelper;
