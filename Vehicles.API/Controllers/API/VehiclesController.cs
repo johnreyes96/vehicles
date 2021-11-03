@@ -28,18 +28,18 @@ namespace Vehicles.API.Controllers.API
             _userHelper = userHelper;
         }
 
-        // GET: api/Vehicles
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Vehicle>>> GetVehicles()
-        {
-            return await _context.Vehicles.ToListAsync();
-        }
-
         // GET: api/Vehicles/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Vehicle>> GetVehicle(int id)
         {
-            Vehicle vehicle = await _context.Vehicles.FindAsync(id);
+            Vehicle vehicle = await _context.Vehicles
+                .Include(x => x.VehicleType)
+                .Include(x => x.Brand)
+                .Include(x => x.VehiclePhotos)
+                .Include(x => x.Histories)
+                .ThenInclude(x => x.Details)
+                .ThenInclude(x => x.Procedure)
+                .FirstOrDefaultAsync(x => x.Id == id);
 
             if (vehicle == null)
             {
