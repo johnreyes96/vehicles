@@ -125,7 +125,7 @@ namespace Vehicles.API.Controllers.API
             return Ok(user);
         }
 
-        [HttpPut]
+        [HttpPut("{id}")]
         public async Task<ActionResult<User>> PutUser(string id, UserRequest request)
         {
             if (id != request.Id)
