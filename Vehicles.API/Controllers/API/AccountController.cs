@@ -144,7 +144,8 @@ namespace Vehicles.API.Controllers.API
         {
             if (ModelState.IsValid)
             {
-                User user = await _userHelper.GetUserAsync(User.Identity.Name);
+                string email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+                User user = await _userHelper.GetUserAsync(email);
                 if (user != null)
                 {
                     IdentityResult result = await _userHelper.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
