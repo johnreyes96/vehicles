@@ -124,5 +124,48 @@ namespace Vehicles.API.Controllers.API
 
             return Ok(user);
         }
+
+        [HttpPut]
+        public async Task<ActionResult<User>> PutUser(string id, UserRequest request)
+        {
+            if (id != request.Id)
+            {
+                return BadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            DocumentType documentType = await _context.DocumentTypes.FindAsync(request.DocumentTypeId);
+            if (documentType == null)
+            {
+                return BadRequest("El tipo de documento no existe.");
+            }
+
+            User user = await _userHelper.GetUserAsync(Guid.Parse(request.Id));
+            if (user == null)
+            {
+                return BadRequest("No existe usuario.");
+            }
+
+            Guid imageId = Guid.Empty;
+            if (request.Image != null && request.Image.Length > 0)
+            {
+                imageId = await _blobHelper.UploadBlobAsync(request.Image, "users");
+            }
+
+            user.Address = request.Address;
+            user.Document = request.Document;
+            user.DocumentType = documentType;
+            user.FirstName = request.FirstName;
+            user.ImageId = imageId;
+            user.LastName = request.LastName;
+            user.PhoneNumber = request.PhoneNumber;
+
+            await _userHelper.UpdateUserAsync(user);
+            return Ok(user);
+        }
     }
 }
