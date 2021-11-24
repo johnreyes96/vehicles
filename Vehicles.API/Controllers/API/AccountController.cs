@@ -282,7 +282,20 @@ namespace Vehicles.API.Controllers.API
 
         private FirstLastName SeparateFirstLastName(string fullName)
         {
-            throw new NotImplementedException();
+            int pos = fullName.IndexOf(' ');
+            FirstLastName firstLastName = new();
+            if (pos == -1)
+            {
+                firstLastName.FirstName = fullName;
+                firstLastName.LastName = fullName;
+            }
+            else
+            {
+                firstLastName.FirstName = fullName.Substring(0, pos);
+                firstLastName.LastName = fullName.Substring(pos + 1, fullName.Length - pos - 1);
+            }
+
+            return firstLastName;
         }
     }
 }
