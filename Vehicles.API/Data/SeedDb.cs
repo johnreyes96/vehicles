@@ -25,10 +25,10 @@ namespace Vehicles.API.Data
             await CheckDocumentTypesAsync();
             await CheckProceduresAsync();
             await CheckRolesAsync();
-            await CheckUserAsync("1010", "Luis", "Salazar", "luis@yopmail.com", "310 705 5450", "Calle 10 # 10 10", UserType.Admin);
-            await CheckUserAsync("2020", "John", "Reyes", "john@yopmail.com", "310 705 5450", "Calle 10 # 10 10", UserType.User);
-            await CheckUserAsync("3030", "Adriana", "zapata", "adriana@yopmail.com", "310 705 5450", "Calle 10 # 10 10", UserType.User);
-            await CheckUserAsync("4040", "Sandra", "Lopera", "sandra@yopmail.com", "310 705 5450", "Calle 10 # 10 10", UserType.Admin);
+            await CheckUserAsync("1010", "Luis", "Salazar", "luis@yopmail.com", "322 311 4620", "Calle 10 # 10 10", UserType.Admin);
+            await CheckUserAsync("2020", "John", "Reyes", "john@yopmail.com", "322 311 4620", "Calle 10 # 10 10", UserType.User);
+            await CheckUserAsync("3030", "Adriana", "zapata", "adriana@yopmail.com", "322 311 4620", "Calle 10 # 10 10", UserType.User);
+            await CheckUserAsync("4040", "Sandra", "Lopera", "sandra@yopmail.com", "322 311 4620", "Calle 10 # 10 10", UserType.Admin);
         }
 
         private async Task CheckUserAsync(string document, string firstName, string lastName, string email, string phoneNumber, string address, UserType userType)
@@ -39,6 +39,7 @@ namespace Vehicles.API.Data
                 user = new User
                 {
                     Address = address,
+                    CountryCode = "57",
                     Document = document,
                     DocumentType = _context.DocumentTypes.FirstOrDefault(x => x.Description == "Cédula"),
                     Email = email,
