@@ -35,10 +35,20 @@ namespace Vehicles.API.Data.Entities
         public Guid ImageId { get; set; }
 
         [Display(Name = "Foto")]
-        public string ImageFullPath => ImageId == Guid.Empty
-            ? $"https://vehiclesapijohn.azurewebsites.net/images/no-image.png"
-            : $"https://vehiclesjohn.blob.core.windows.net/users/{ImageId}";
+        public string ImageFullPath => LoginType == LoginType.Email
+            ? ImageId == Guid.Empty
+                ? $"https://vehiclesapijohn.azurewebsites.net/images/no-image.png"
+                : $"https://vehiclesjohn.blob.core.windows.net/users/{ImageId}"
+            : string.IsNullOrEmpty(SocialImageURL)
+                ? $"https://vehiclesapijohn.azurewebsites.net/images/no-image.png"
+                : SocialImageURL;
 
+        [Display(Name = "Foto")]
+        public string SocialImageURL { get; set; }
+
+        [Display(Name = "Tipo de login")]
+        public LoginType LoginType { get; set; }
+                
         [Display(Name = "Tipo de usuario")]
         public UserType UserType { get; set; }
 
